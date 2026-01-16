@@ -1,27 +1,20 @@
 import { Droppable } from "@hello-pangea/dnd";
 import TaskCard from "./TaskCard";
-import type { Task } from "./KanbanBoard";
 
-type Props = {
-  title: string;
-  droppableId: string;
-  tasks: Task[];
-};
-
-const KanbanColumn = ({ title, droppableId, tasks }: Props) => {
+const KanbanColumn = ({ title, columnId, tasks }: any) => {
   return (
-    <div className="flex-1 rounded-lg bg-muted p-4 flex flex-col">
-      <h3 className="mb-4 font-semibold">{title}</h3>
+    <div className="w-80 bg-muted rounded p-3 flex flex-col">
+      <h3 className="font-semibold mb-3">{title}</h3>
 
-      <Droppable droppableId={droppableId}>
+      <Droppable droppableId={columnId}>
         {(provided) => (
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className="space-y-3 min-h-[100px]"
+            className="flex-1 space-y-2 overflow-y-auto"
           >
-            {tasks.map((task, index) => (
-              <TaskCard key={task.id} task={task} index={index} />
+            {tasks.map((task: any, index: number) => (
+              <TaskCard key={task._id} task={task} index={index} />
             ))}
             {provided.placeholder}
           </div>

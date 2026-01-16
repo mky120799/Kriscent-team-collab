@@ -1,8 +1,13 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+/* Layouts */
 import AuthLayout from "./layouts/AuthLayout";
 import AppLayout from "./layouts/AppLayout";
 
+/* Auth & Protection */
+import ProtectedRoute from "@/auth/ProtectedRoute";
+
+/* Pages */
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -11,29 +16,76 @@ import Tasks from "./pages/Tasks";
 import Team from "./pages/Team";
 import Chat from "./pages/Chat";
 import Settings from "./pages/Settings";
+import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Auth routes */}
+        {/* ================= AUTH ROUTES ================= */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
 
-        {/* App routes */}
+        {/* ================= APP ROUTES ================= */}
         <Route element={<AppLayout />}>
           <Route path="/" element={<Dashboard />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/tasks" element={<Tasks />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/settings" element={<Settings />} />
+
+          {/* Projects – Admin & Manager only */}
+          <Route
+            path="/projects"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]}>
+                <Projects />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Tasks – All roles */}
+          <Route
+            path="/tasks"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN", "MANAGER", "MEMBER"]}>
+                <Tasks />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Team – Admin & Manager */}
+          <Route
+            path="/team"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]}>
+                <Team />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Chat – All roles */}
+          <Route
+            path="/chat"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN", "MANAGER", "MEMBER"]}>
+                <Chat />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Settings – Admin only */}
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
-        {/* Fallback */}
+        {/* ================= FALLBACK ================= */}
+        <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

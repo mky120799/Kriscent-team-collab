@@ -1,30 +1,19 @@
 import { Draggable } from "@hello-pangea/dnd";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { type Task } from "./KanbanBoard";
 
-type Props = {
-  task: Task;
-  index: number;
-};
-
-const TaskCard = ({ task, index }: Props) => {
+const TaskCard = ({ task, index }: any) => {
   return (
-    <Draggable draggableId={task.id} index={index}>
+    <Draggable draggableId={task._id} index={index}>
       {(provided) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
+          className="bg-card rounded p-3 shadow"
         >
-          <Card className="cursor-grab active:cursor-grabbing">
-            <CardHeader className="p-3">
-              <p className="font-medium text-sm">{task.title}</p>
-            </CardHeader>
-
-            <CardContent className="p-3 pt-0 text-xs text-muted-foreground">
-              Task details here
-            </CardContent>
-          </Card>
+          <h4 className="font-medium">{task.title}</h4>
+          {task.description && (
+            <p className="text-sm text-muted-foreground">{task.description}</p>
+          )}
         </div>
       )}
     </Draggable>

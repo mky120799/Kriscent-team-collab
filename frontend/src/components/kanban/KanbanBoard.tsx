@@ -1,66 +1,59 @@
-import { useState } from "react";
-import { DragDropContext } from "@hello-pangea/dnd";
-import type { DropResult } from "@hello-pangea/dnd";
+import { DragDropContext, type DropResult } from "@hello-pangea/dnd";
 import KanbanColumn from "./KanbanColumn";
+import CreateTaskButton from "@/components/tasks/CreateTaskButton";
 
-export type Task = {
-  id: string;
-  title: string;
+import {
+  useGetTasksByProjectQuery,
+  useUpdateTaskStatusMutation,
+} from "@/store/services/TaskApi";
+
+type Props = {
+  projectId: string;
 };
 
-type BoardState = {
-  todo: Task[];
-  inProgress: Task[];
-  done: Task[];
-};
+// TEMP role (replace with auth later)
+const userRole = "MANAGER";
 
-const KanbanBoard = () => {
-  const [board, setBoard] = useState<BoardState>({
-    todo: [
-      { id: "1", title: "Design DB schema" },
-      { id: "2", title: "Setup backend" },
-    ],
-    inProgress: [{ id: "3", title: "Kanban UI" }],
-    done: [{ id: "4", title: "Project structure" }],
-  });
+const KanbanBoard = ({ projectId }: Props) => {
+  const { data: tasks = [] } = useGetTasksByProjectQuery(projectId);
+  const [updateTaskStatus] = useUpdateTaskStatusMutation();
 
-  const onDragEnd = (result: DropResult) => {
-    const { source, destination } = result;
+  const columns = {
+    todo: tasks.filter((t) => t.status === "todo"),
+    "in-progress": tasks.filter((t) => t.status === "in-progress"),
+    done: tasks.filter((t) => t.status === "done"),
+  };
+
+  const onDragEnd = async (result: DropResult) => {
+    const { destination, source, draggableId } = result;
 
     if (!destination) return;
     if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    ) {
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    )
       return;
-    }
 
-    const sourceColumn = board[source.droppableId as keyof BoardState];
-    const destColumn = board[destination.droppableId as keyof BoardState];
-
-    const sourceTasks = Array.from(sourceColumn);
-    const destTasks = Array.from(destColumn);
-
-    const [movedTask] = sourceTasks.splice(source.index, 1);
-    destTasks.splice(destination.index, 0, movedTask);
-
-    setBoard({
-      ...board,
-      [source.droppableId]: sourceTasks,
-      [destination.droppableId]: destTasks,
+    await updateTaskStatus({
+      taskId: draggableId,
+      status: destination.droppableId as any,
     });
   };
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex gap-6">
-        <KanbanColumn title="Todo" droppableId="todo" tasks={board.todo} />
+      <div className="flex gap-4 h-full overflow-x-auto">
+        <div className="flex justify-between mb-4">
+          <h2 className="text-xl font-semibold">Kanban Board</h2>
+          <CreateTaskButton projectId={projectId} role={userRole} />
+        </div>
+        <KanbanColumn title="Todo" columnId="todo" tasks={columns.todo} />
         <KanbanColumn
           title="In Progress"
-          droppableId="inProgress"
-          tasks={board.inProgress}
+          columnId="in-progress"
+          tasks={columns["in-progress"]}
         />
-        <KanbanColumn title="Done" droppableId="done" tasks={board.done} />
+        <KanbanColumn title="Done" columnId="done" tasks={columns.done} />
       </div>
     </DragDropContext>
   );
