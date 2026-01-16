@@ -1,4 +1,5 @@
 import type { Response, NextFunction } from "express";
+import { logActivity } from "../utils/activityLogger.js";
 import  Task from "../models/Task.model.js";
 import { type AuthRequest } from "../middlewares/auth.middleware.js";
 import { getIO } from "../config/socket.js";
@@ -34,6 +35,17 @@ export const createTask = async (
 ) => {
   try {
     const task = await Task.create(req.body);
+    // Log activity AFTER task is created
+    if (req.user) {
+      await logActivity({
+        action: "TASK_CREATED",
+        entity: "TASK",
+        entityId: task._id,
+        performedBy: req.user._id,
+        teamId: (task as any).teamId ? (task as any).teamId.toString() : undefined,
+        metadata: { title: task.title },
+      });
+    }
     res.status(201).json(task);
   } catch (error) {
     next(error);
@@ -82,3 +94,5 @@ export const deleteTask = async (
     next(error);
   }
 };
+
+

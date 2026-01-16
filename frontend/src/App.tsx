@@ -18,6 +18,7 @@ import Chat from "./pages/Chat";
 import Settings from "./pages/Settings";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
+import Activity from "./pages/Activity";
 
 const App = () => {
   return (
@@ -83,6 +84,15 @@ const App = () => {
             }
           />
         </Route>
+        {/* Activity */}
+        <Route
+          path="/activity"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]}>
+              <Activity />
+            </ProtectedRoute>
+          }
+        />
 
         {/* ================= FALLBACK ================= */}
         <Route path="/unauthorized" element={<Unauthorized />} />

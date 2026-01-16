@@ -6,6 +6,7 @@ import projectRoutes from "./routes/project.routes.js";
 import taskRoutes from "./routes/task.routes.js";
 import messageRoutes from "./routes/message.routes.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
+import activityRoutes from "./routes/activity.routes.js";
 
 
 
@@ -20,5 +21,6 @@ app.use(errorHandler);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/activity", activityRoutes);
 
 export default app;
