@@ -5,7 +5,7 @@ import CreateTaskButton from "@/components/tasks/CreateTaskButton";
 import {
   useGetTasksByProjectQuery,
   useUpdateTaskStatusMutation,
-} from "@/store/services/TaskApi";
+} from "@/store/services/task.api";
 
 type Props = {
   projectId: string;

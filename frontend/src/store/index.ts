@@ -1,15 +1,16 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { messageApi } from "./services/MessageApi";
-import { taskApi } from "./services/TaskApi";
-// import other reducers if any
+import authReducer from "./slices/auth.slice";
+import { taskApi } from "./services/task.api";
+import { messageApi } from "./services/message.api";
 
 export const store = configureStore({
   reducer: {
-    [messageApi.reducerPath]: messageApi.reducer,
+    auth: authReducer,
     [taskApi.reducerPath]: taskApi.reducer,
+    [messageApi.reducerPath]: messageApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(messageApi.middleware, taskApi.middleware),
+    getDefaultMiddleware().concat(taskApi.middleware, messageApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

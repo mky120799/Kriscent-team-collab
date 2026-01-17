@@ -9,7 +9,7 @@ export const getMessages = async (
   next: NextFunction
 ) => {
   try {
-    const { teamId } = req.query;
+    const teamId = req.user?.teamId;
 
     if (!teamId) {
       return res.status(400).json({ message: "teamId is required" });

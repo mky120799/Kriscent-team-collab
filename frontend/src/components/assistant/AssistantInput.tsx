@@ -3,9 +3,9 @@ import {
   useCreateTaskMutation,
   useGetTasksByProjectQuery,
   useUpdateTaskStatusMutation,
-} from "@/store/services/TaskApi";
+} from "@/store/services/task.api";
 import { parseCommand } from "./assistantUtils";
-import { useAuth } from "@/auth/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 
 type Props = {
   projectId: string;

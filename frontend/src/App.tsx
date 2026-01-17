@@ -16,7 +16,7 @@ import Tasks from "./pages/Tasks";
 import Team from "./pages/Team";
 import Chat from "./pages/Chat";
 import Settings from "./pages/Settings";
-import Unauthorized from "./pages/Unauthorized";
+import Unauthorized from "./pages/Unauthorised";
 import NotFound from "./pages/NotFound";
 import Activity from "./pages/Activity";
 
@@ -32,7 +32,15 @@ const App = () => {
 
         {/* ================= APP ROUTES ================= */}
         <Route element={<AppLayout />}>
-          <Route path="/" element={<Dashboard />} />
+          {/* Dashboard – All logged-in users */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Projects – Admin & Manager only */}
           <Route
@@ -54,7 +62,7 @@ const App = () => {
             }
           />
 
-          {/* Team – Admin & Manager */}
+          {/* Team – Admin & Manager only */}
           <Route
             path="/team"
             element={
@@ -74,6 +82,16 @@ const App = () => {
             }
           />
 
+          {/* Activity – Admin & Manager only */}
+          <Route
+            path="/activity"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]}>
+                <Activity />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Settings – Admin only */}
           <Route
             path="/settings"
@@ -84,15 +102,6 @@ const App = () => {
             }
           />
         </Route>
-        {/* Activity */}
-        <Route
-          path="/activity"
-          element={
-            <ProtectedRoute allowedRoles={["ADMIN", "MANAGER"]}>
-              <Activity />
-            </ProtectedRoute>
-          }
-        />
 
         {/* ================= FALLBACK ================= */}
         <Route path="/unauthorized" element={<Unauthorized />} />

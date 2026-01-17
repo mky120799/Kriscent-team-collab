@@ -1,36 +1,56 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { loginUser, type AuthUser } from "@/services/auth.service";
 
-interface User {
-  uid: string;
-  email: string | null;
-  name?: string;
-  role?: "ADMIN" | "MANAGER" | "MEMBER";
-}
-
-interface AuthState {
-  user: User | null;
+type AuthState = {
+  user: AuthUser | null;
   loading: boolean;
-}
+  error: string | null;
+};
 
 const initialState: AuthState = {
   user: null,
-  loading: true,
+  loading: false,
+  error: null,
 };
+
+export const loginThunk = createAsyncThunk(
+  "auth/login",
+  async (
+    { email, password }: { email: string; password: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      return await loginUser({ email, password });
+    } catch {
+      return rejectWithValue("Invalid credentials");
+    }
+  }
+);
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setUser(state, action: PayloadAction<User | null>) {
-      state.user = action.payload;
-      state.loading = false;
-    },
-    logout(state) {
+    logout: (state) => {
       state.user = null;
-      state.loading = false;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(loginThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(loginThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+      })
+      .addCase(loginThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
-export const { setUser, logout } = authSlice.actions;
+export const { logout } = authSlice.actions;
 export default authSlice.reducer;

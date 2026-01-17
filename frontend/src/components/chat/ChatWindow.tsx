@@ -1,4 +1,4 @@
-import { useGetMessagesQuery } from "@/store/services/MessageApi";
+import { useGetMessagesQuery } from "@/store/services/message.api";
 import MessageItem from "./MessageItem";
 import MessageInput from "./MessageInput";
 

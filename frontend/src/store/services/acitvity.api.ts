@@ -4,7 +4,7 @@ export interface ActivityLog {
   _id: string;
   action: string;
   entity: string;
-  metadata: any;
+  metadata: Record<string, unknown>;
   performedBy: { name: string };
   createdAt: string;
 }

@@ -4,22 +4,28 @@ export interface IMessage extends Document {
   content: string;
   senderId: mongoose.Types.ObjectId;
   teamId: mongoose.Types.ObjectId;
-  timestamp: Date;
+  createdAt: Date;
 }
 
-const messageSchema = new Schema<IMessage>({
-  content: { type: String, required: true },
-  senderId: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
+const MessageSchema = new Schema<IMessage>(
+  {
+    content: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    senderId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    teamId: {
+      type: Schema.Types.ObjectId,
+      ref: "Team",
+      required: true,
+    },
   },
-  teamId: {
-    type: Schema.Types.ObjectId,
-    ref: "Team",
-    required: true,
-  },
-  timestamp: { type: Date, default: Date.now },
-});
+  { timestamps: true }
+);
 
-export default mongoose.model<IMessage>("Message", messageSchema);
+export default mongoose.model<IMessage>("Message", MessageSchema);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSendMessageMutation } from "@/store/services/MessageApi";
+import { useSendMessageMutation } from "@/store/services/message.api";
 
 const MessageInput = ({ teamId }: { teamId: string }) => {
   const [text, setText] = useState("");

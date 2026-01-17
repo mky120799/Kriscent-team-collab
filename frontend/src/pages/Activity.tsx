@@ -1,5 +1,5 @@
 
-import { useGetActivityLogsQuery } from "../store/services/AcitvityApi";
+import { useGetActivityLogsQuery } from "../store/services/acitvity.api";
 
 const Activity = () => {
   const { data = [], isLoading } = useGetActivityLogsQuery();

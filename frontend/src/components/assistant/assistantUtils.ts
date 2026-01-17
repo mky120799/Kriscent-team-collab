@@ -1,4 +1,4 @@
-import type { TaskStatus } from "@/store/services/TaskApi";
+import type { TaskStatus } from "@/store/services/task.api";
 
 export const parseCommand = (
   input: string
