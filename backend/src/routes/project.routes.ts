@@ -10,15 +10,18 @@ import {
 } from "../controllers/project.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/rbac.middleware.js";
+import { sessionAuth } from "../middlewares/sessionAuth.middleware.js";
 
 const router = Router();
 
+// ✅ Routes
 router.get("/", authenticate, getProjects);
 
 router.post(
   "/",
   authenticate,
   authorizeRoles("ADMIN", "MANAGER"),
+  validate(createProjectSchema),
   createProject
 );
 
@@ -30,12 +33,5 @@ router.put(
 );
 
 router.delete("/:id", authenticate, authorizeRoles("ADMIN"), deleteProject);
-router.post(
-  "/",
-  authenticate,
-  authorizeRoles("ADMIN", "MANAGER"),
-  validate(createProjectSchema),
-  createProject
-);
 
 export default router;

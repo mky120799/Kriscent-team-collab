@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import User, { type IUser } from "../models/User.model.js";
+import admin from "../config/firebaseAdmin.js";
 
 export interface AuthRequest extends Request {
   user?: IUser;
@@ -11,19 +12,26 @@ export const authenticate = async (
   next: NextFunction
 ) => {
   try {
-    const firebaseUid = req.headers["x-firebase-uid"] as string;
-    if (!firebaseUid) {
-      return res.status(401).json({ message: "Unauthorized" });
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Unauthorized: No token provided" });
     }
 
-    const user = await User.findOne({ firebaseUid });
+    const token = authHeader?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized: Invalid token format" });
+    }
+    const decoded = await admin.auth().verifyIdToken(token);
+
+    const user = await User.findOne({ firebaseUid: decoded.uid });
     if (!user) {
-      return res.status(401).json({ message: "User not found" });
+      return res.status(401).json({ message: "Unauthorized: User not found in database" });
     }
 
     req.user = user;
     next();
   } catch (err) {
-    next(err);
+    console.error("Auth Error:", err);
+    return res.status(401).json({ message: "Unauthorized: Invalid token" });
   }
 };

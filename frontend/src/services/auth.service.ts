@@ -7,7 +7,7 @@ import { auth } from "@/config/firebase";
 export type AuthUser = {
   _id: string;
   role: "ADMIN" | "MANAGER" | "MEMBER";
-  teamId: string;
+  teamId: string | null;
   firebaseUid: string;
 };
 
@@ -66,19 +66,21 @@ export const loginUser = async ({
     password
   );
 
-  const token = await userCredential.user.getIdToken();
+  const idToken = await userCredential.user.getIdToken();
 
   const res = await fetch("http://localhost:5555/api/auth/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
+    credentials: "include",
+    body: JSON.stringify({ idToken }),
   });
 
   if (!res.ok) {
     throw new Error("Login failed");
   }
 
-  return res.json();
+  const data = await res.json();
+  return data.user as AuthUser;
 };

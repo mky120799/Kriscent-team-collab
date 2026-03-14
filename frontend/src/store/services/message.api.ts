@@ -1,5 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { socket } from "@/socket";
+import { auth } from "@/config/firebase";
 
 /**
  * Types
@@ -20,21 +21,22 @@ export type Message = {
 export const messageApi = createApi({
   reducerPath: "messageApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5555/api",
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
+    baseUrl: import.meta.env.VITE_API_URL,
+    prepareHeaders: async (headers) => {
+      const token = await auth.currentUser?.getIdToken();
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
       return headers;
     },
+    credentials: "include",
   }),
   tagTypes: ["Messages"],
   endpoints: (builder) => ({
     /**
-     * 1️⃣ Get all messages for the team
+     * 1️⃣ Get all messages for the team (teamId comes from auth token)
      */
-    getMessages: builder.query<Message[], void>({
+    getMessages: builder.query<Message[], { teamId: string }>({
       query: () => "/messages",
 
       async onCacheEntryAdded(
@@ -51,12 +53,12 @@ export const messageApi = createApi({
           });
         };
 
-        // Subscribe
-        socket.on("message:new", handler);
+        // Subscribe - backend emits "new-message"
+        socket.on("new-message", handler);
 
         // Cleanup on unmount
         await cacheEntryRemoved;
-        socket.off("message:new", handler);
+        socket.off("new-message", handler);
       },
     }),
 

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { loginUser, type AuthUser } from "@/services/auth.service";
+import { connectSocket } from "@/socket";
 
 type AuthState = {
   user: AuthUser | null;
@@ -33,6 +34,7 @@ const authSlice = createSlice({
   reducers: {
     logout: (state) => {
       state.user = null;
+      localStorage.removeItem("token");
     },
   },
   extraReducers: (builder) => {
@@ -44,6 +46,8 @@ const authSlice = createSlice({
       .addCase(loginThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        // Connect socket after successful login
+        connectSocket().catch(console.error);
       })
       .addCase(loginThunk.rejected, (state, action) => {
         state.loading = false;

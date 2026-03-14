@@ -1,11 +1,7 @@
-import useAuthContext from "../auth/AuthContext";
+import { useAppSelector } from "@/store/hooks";
 
 export const useAuth = () => {
-  const user = useAuthContext();
+  const { user, loading } = useAppSelector((state) => state.auth);
 
-  if (!user) {
-    throw new Error("useAuth must be used inside AuthProvider");
-  }
-
-  return user;
+  return { user, loading };
 };

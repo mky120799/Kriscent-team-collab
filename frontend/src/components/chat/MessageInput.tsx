@@ -1,20 +1,27 @@
 import { useState } from "react";
-import { useSendMessageMutation } from "@/store/services/message.api";
+import { socket } from "@/socket";
 
-const MessageInput = ({ teamId }: { teamId: string }) => {
+const MessageInput = () => {
   const [text, setText] = useState("");
-  const [sendMessage] = useSendMessageMutation();
 
-  const handleSend = async () => {
+  const handleSend = () => {
     if (!text.trim()) return;
 
-    await sendMessage({
-      content: text,
-      teamId,
-      senderId: "u1", // from auth later
-    });
+    // Check if socket is connected
+    if (!socket.connected) {
+      console.error("Socket not connected");
+      return;
+    }
 
+    // Send via socket for real-time delivery
+    socket.emit("send-message", text.trim());
     setText("");
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSend();
+    }
   };
 
   return (
@@ -22,6 +29,7 @@ const MessageInput = ({ teamId }: { teamId: string }) => {
       <input
         value={text}
         onChange={(e) => setText(e.target.value)}
+        onKeyPress={handleKeyPress}
         className="flex-1 border rounded px-3 py-2"
         placeholder="Type a message..."
       />

@@ -17,7 +17,7 @@ export const getMessages = async (
 
     const messages = await Message.find({ teamId })
       .populate("senderId", "name email role")
-      .sort({ timestamp: 1 });
+      .sort({ createdAt: 1 });
 
     res.status(200).json(messages);
   } catch (error) {
@@ -25,23 +25,45 @@ export const getMessages = async (
   }
 };
 
-export const sendMessage = async (req: any, res: any) => {
+export const sendMessage = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { content } = req.body;
-    const { teamId } = req.user;
+    const teamId = req.user?.teamId;
+
+    if (!teamId) {
+      return res.status(400).json({ message: "teamId is required" });
+    }
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({ message: "Message content is required" });
+    }
+
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
     const message = await Message.create({
-      content,
+      content: content.trim(),
       senderId: req.user._id,
       teamId,
     });
 
+    // Populate senderId before emitting
+    const populatedMessage = await message.populate(
+      "senderId",
+      "name email role"
+    );
+
     // emit to team room
     const io = getIO();
-    io.to(teamId.toString()).emit("new-message", message);
+    io.to(teamId.toString()).emit("new-message", populatedMessage);
 
-    res.status(201).json(message);
+    res.status(201).json(populatedMessage);
   } catch (error) {
-    res.status(500).json({ message: "Failed to send message" });
+    next(error);
   }
 };

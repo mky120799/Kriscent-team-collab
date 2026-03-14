@@ -1,8 +1,17 @@
 import type { Response, NextFunction } from "express";
 import { logActivity } from "../utils/activityLogger.js";
-import  Task from "../models/Task.model.js";
+import Task, { type ITask } from "../models/Task.model.js";
 import { type AuthRequest } from "../middlewares/auth.middleware.js";
 import { getIO } from "../config/socket.js";
+
+interface TaskPayload {
+  title: string;
+  description?: string;
+  status?: "todo" | "in-progress" | "done";
+  projectId: string;
+  assignedTo?: string;
+  teamId?: string;
+}
 
 export const getTasks = async (
   req: AuthRequest,
@@ -12,7 +21,6 @@ export const getTasks = async (
   try {
     const { projectId } = req.query;
 
-    // Ensure projectId is a string and exists before querying
     if (!projectId || typeof projectId !== "string") {
       return res.status(400).json({ message: "Invalid or missing projectId" });
     }
@@ -34,46 +42,73 @@ export const createTask = async (
   next: NextFunction
 ) => {
   try {
-    const task = await Task.create(req.body);
-    // Log activity AFTER task is created
+    const payload: TaskPayload = req.body;
+
+    if (!payload.projectId) {
+      return res.status(400).json({ message: "ProjectId is required" });
+    }
+
+    // Assign teamId from user if not provided
+    if (req.user && !payload.teamId && req.user.teamId) {
+      payload.teamId = req.user.teamId?.toString() ?? payload.teamId;
+    }
+
+    const task = await Task.create(payload);
+
+    // Log activity AFTER task creation
     if (req.user) {
       await logActivity({
         action: "TASK_CREATED",
         entity: "TASK",
         entityId: task._id,
         performedBy: req.user._id,
-        teamId: (task as any).teamId ? (task as any).teamId.toString() : undefined,
+        teamId: payload.teamId || req.user.teamId?.toString(),
         metadata: { title: task.title },
       });
     }
+
+    // 🔥 Real-time emit
+    const io = getIO();
+    const teamId = payload.teamId || req.user?.teamId?.toString();
+    if (teamId) {
+      io.to(teamId).emit("task-created", task);
+    }
+
     res.status(201).json(task);
   } catch (error) {
     next(error);
   }
 };
 
-export const updateTask = async (req: any, res: any) => {
+export const updateTask = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const taskId = req.params.id;
-    const { status, assignedTo } = req.body;
+    const { status, assignedTo } = req.body as Partial<TaskPayload>;
 
     const updatedTask = await Task.findByIdAndUpdate(
       taskId,
       { status, assignedTo },
       { new: true }
-    );
+    ).populate("assignedTo", "name email role");
 
     if (!updatedTask) {
-      return res.status(404).json({ message: "Task not found" });
+      return res.status(404).json({ message: "Task find failed" });
     }
 
-    // 🔥 REAL-TIME EMIT
+    // 🔥 Real-time emit to the specific team room
     const io = getIO();
-    io.to(updatedTask.projectId.toString()).emit("task-updated", updatedTask);
+    const teamId = updatedTask.teamId?.toString() || req.user?.teamId?.toString();
+    if (teamId) {
+      io.to(teamId).emit("task-updated", updatedTask);
+    }
 
     res.status(200).json(updatedTask);
   } catch (error) {
-    res.status(500).json({ message: "Failed to update task" });
+    next(error);
   }
 };
 
@@ -89,10 +124,15 @@ export const deleteTask = async (
       return res.status(404).json({ message: "Task not found" });
     }
 
+    // 🔥 Real-time emit
+    const io = getIO();
+    const teamId = req.user?.teamId?.toString();
+    if (teamId) {
+      io.to(teamId).emit("task-deleted", { taskId: task._id });
+    }
+
     res.status(200).json({ message: "Task deleted successfully" });
   } catch (error) {
     next(error);
   }
 };
-
-

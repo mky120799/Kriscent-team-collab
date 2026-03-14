@@ -6,6 +6,7 @@ export interface ITask extends Document {
   status: "todo" | "in-progress" | "done";
   projectId: mongoose.Types.ObjectId;
   assignedTo?: mongoose.Types.ObjectId;
+  teamId: mongoose.Types.ObjectId;
 }
 
 const taskSchema = new Schema<ITask>(
@@ -23,6 +24,7 @@ const taskSchema = new Schema<ITask>(
       required: true,
     },
     assignedTo: { type: Schema.Types.ObjectId, ref: "User" },
+    teamId: { type: Schema.Types.ObjectId, ref: "Team", required: true },
   },
   { timestamps: true }
 );

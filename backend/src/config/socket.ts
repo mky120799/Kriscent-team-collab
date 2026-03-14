@@ -7,13 +7,13 @@ import Message from "../models/Message.model.js";
 let io: Server;
 
 export const initSocket = (server: HttpServer) => {
- const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173", // frontend URL
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
+  io = new Server(server, {
+    cors: {
+      origin: "http://localhost:5173", // frontend URL
+      methods: ["GET", "POST"],
+      credentials: true,
+    },
+  });
 
   // 🔐 Socket Auth Middleware
   io.use(async (socket, next) => {
@@ -54,16 +54,10 @@ export const initSocket = (server: HttpServer) => {
         teamId: user.teamId,
       });
 
-      const populatedMessage = await message.populate(
-        "senderId",
-        "name"
-      );
+      const populatedMessage = await message.populate("senderId", "name");
 
       // 📡 Broadcast to entire team
-      io.to(user.teamId.toString()).emit(
-        "new-message",
-        populatedMessage
-      );
+      io.to(user.teamId.toString()).emit("new-message", populatedMessage);
     });
 
     socket.on("disconnect", () => {
@@ -74,7 +68,7 @@ export const initSocket = (server: HttpServer) => {
   return io;
 };
 
-export const getIO = () => {
+export const getIO = (): Server => {
   if (!io) {
     throw new Error("Socket.io not initialized");
   }

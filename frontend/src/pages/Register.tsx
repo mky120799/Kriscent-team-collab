@@ -7,7 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { registerUser } from "@/services/auth.service";
-
+import { useNavigate } from "react-router-dom";
 const registerSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters"),
@@ -24,6 +24,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const Register = () => {
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const {
     register,
@@ -42,7 +43,7 @@ const Register = () => {
         email: data.email,
         password: data.password,
       });
-
+      navigate('/')
       console.log("User registered successfully");
     } catch (error) {
       console.error("Registration failed:", error);

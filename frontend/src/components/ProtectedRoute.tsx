@@ -1,22 +1,27 @@
+import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAppSelector } from "@/store/hooks";
 
-const ProtectedRoute = ({
-  allowedRoles,
-  children,
-}: {
-  allowedRoles: Array<"ADMIN" | "MANAGER" | "MEMBER">;
-  children: JSX.Element;
-}) => {
-  const user = useAppSelector((state) => state.auth.user);
+interface ProtectedRouteProps {
+  allowedRoles: string[];
+  children: ReactNode;
+}
 
-  if (!user) return <Navigate to="/login" replace />;
+const ProtectedRoute = ({ allowedRoles, children }: ProtectedRouteProps) => {
+  const { user } = useAppSelector((state) => state.auth);
 
+  // Not logged in
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Role not allowed
   if (!allowedRoles.includes(user.role)) {
     return <Navigate to="/unauthorized" replace />;
   }
 
-  return children;
+  // Allowed
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

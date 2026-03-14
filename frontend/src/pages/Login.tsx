@@ -38,7 +38,7 @@ const Login = () => {
     const result = await dispatch(loginThunk(data));
 
     if (loginThunk.fulfilled.match(result)) {
-      navigate("/dashboard");
+      navigate("/");
     }
   };
 

@@ -16,7 +16,7 @@ import Tasks from "./pages/Tasks";
 import Team from "./pages/Team";
 import Chat from "./pages/Chat";
 import Settings from "./pages/Settings";
-import Unauthorized from "./pages/Unauthorised";
+import Unauthorised from "./pages/Unauthorised";
 import NotFound from "./pages/NotFound";
 import Activity from "./pages/Activity";
 
@@ -55,6 +55,14 @@ const App = () => {
           {/* Tasks – All roles */}
           <Route
             path="/tasks"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN", "MANAGER", "MEMBER"]}>
+                <Tasks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tasks/:projectId"
             element={
               <ProtectedRoute allowedRoles={["ADMIN", "MANAGER", "MEMBER"]}>
                 <Tasks />
@@ -104,7 +112,7 @@ const App = () => {
         </Route>
 
         {/* ================= FALLBACK ================= */}
-        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/unauthorised" element={<Unauthorised />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
