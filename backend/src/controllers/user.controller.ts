@@ -7,7 +7,7 @@ import Project from "../models/Project.model.js";
 export const getUsers = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { projectId, search } = req.query;
@@ -17,7 +17,12 @@ export const getUsers = async (
     if (projectId && typeof projectId === "string") {
       const project = await Project.findById(projectId);
       if (project) {
-        query.teamId = project.teamId;
+        const team = await Team.findById(project.teamId);
+        if (team) {
+          query.$or = [{ teamId: project.teamId }, { _id: team.adminId }];
+        } else {
+          query.teamId = project.teamId;
+        }
       } else {
         return res.status(404).json({ message: "Project not found" });
       }
@@ -40,7 +45,7 @@ export const getUsers = async (
 export const createUser = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const { firebaseUid, name, email } = req.body;

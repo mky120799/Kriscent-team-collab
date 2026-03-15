@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import activityRoutes from "./routes/activity.routes.js";
 import teamRoutes from "./routes/team.routes.js";
+import assistantRoutes from "./routes/assistant.routes.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 import { sessionMiddleware } from "./config/session.js";
 const app = express();
@@ -28,6 +29,7 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/teams", teamRoutes);
+app.use("/api/assistant", assistantRoutes);
 app.use(errorHandler);
 export default app;
 //# sourceMappingURL=app.js.map

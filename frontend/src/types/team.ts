@@ -7,6 +7,12 @@ export type TeamMember = {
 
 export type Activity = {
   _id: string;
-  message: string;
-  timestamp: string;
+  action: string;
+  entity: string;
+  entityId?: string;
+  performedBy?: { _id: string; name: string; email: string };
+  teamId?: string;
+  metadata?: any;
+  createdAt: string;
+  updatedAt: string;
 };

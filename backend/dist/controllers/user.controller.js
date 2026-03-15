@@ -1,39 +1,58 @@
 import mongoose from "mongoose";
 import User from "../models/User.model.js";
 import Team from "../models/Team.model.js";
+import Project from "../models/Project.model.js";
+export const getUsers = async (req, res, next) => {
+    try {
+        const { projectId, search } = req.query;
+        let query = {};
+        if (projectId && typeof projectId === "string") {
+            const project = await Project.findById(projectId);
+            if (project) {
+                query.teamId = project.teamId;
+            }
+            else {
+                return res.status(404).json({ message: "Project not found" });
+            }
+        }
+        if (search && typeof search === "string") {
+            query.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { email: { $regex: search, $options: "i" } },
+            ];
+        }
+        const users = await User.find(query).select("name email role teamId");
+        res.json(users);
+    }
+    catch (error) {
+        next(error);
+    }
+};
 export const createUser = async (req, res, next) => {
     try {
         const { firebaseUid, name, email } = req.body;
-        // 1️⃣ Check if this Firebase user already exists
         const existingUser = await User.findOne({ firebaseUid });
         if (existingUser) {
             return res.status(200).json(existingUser);
         }
-        // 2️⃣ Check if this is the first user in the system
         const userCount = await User.countDocuments();
         let role = "MEMBER";
-        let teamId = null;
-        // 3️⃣ First user → ADMIN + auto-create team
-        if (userCount === 0) {
-            role = "ADMIN";
-            const team = await Team.create({
-                name: "Default Team",
-                description: "Auto-created team for first admin",
-            });
-            teamId = team._id;
-        }
-        // 4️⃣ Create user
-        const userData = {
+        // Create user FIRST
+        const user = new User({
             firebaseUid,
             name,
             email,
-            role,
-        };
-        if (teamId) {
-            userData.teamId = teamId;
+            role: userCount === 0 ? "ADMIN" : "MEMBER",
+        });
+        if (userCount === 0) {
+            const team = await Team.create({
+                name: "Default Team",
+                description: "Auto-created team for first admin",
+                adminId: user._id,
+            });
+            user.teamId = team._id;
         }
-        const user = await User.create(userData);
-        // 5️⃣ Return created user
+        await user.save();
         res.status(201).json({
             _id: user._id,
             name: user.name,

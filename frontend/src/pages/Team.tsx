@@ -1,46 +1,131 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAppSelector } from "@/store/hooks";
 import TeamMemberList from "@/components/team/TeamMemberList";
 import ActivityLog from "@/components/team/ActivityLog";
 import { Button } from "@/components/ui/button";
 import AddMemberModal from "@/components/team/AddMemberModal";
+import CreateTeamModal from "@/components/team/CreateTeamModal";
+import { useGetTeamsQuery } from "@/store/services/team.api";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 
 const Team = () => {
   const user = useAppSelector((state) => state.auth.user);
-  const teamId = user?.teamId;
-  const [isAdding, setIsAdding] = useState(false);
+  const { data: teams = [], isLoading } = useGetTeamsQuery();
 
-  if (!teamId) return <p className="text-center py-20">No team found for this user.</p>;
+  const [selectedTeamId, setSelectedTeamId] = useState<string>("");
+  const [isAdding, setIsAdding] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+
+  useEffect(() => {
+    if (teams.length > 0 && !selectedTeamId) {
+      // Default to either the user's primary team, or the first team loaded.
+      const defaultTeamId =
+        user?.teamId && teams.find((t) => t._id === user.teamId)
+          ? user.teamId
+          : teams[0]._id;
+
+      setSelectedTeamId(defaultTeamId);
+    }
+  }, [teams, user?.teamId, selectedTeamId]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (teams.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-20 space-y-4">
+        <h2 className="text-2xl font-bold">No Teams Found</h2>
+        <p className="text-muted-foreground">
+          You do not belong to any team currently.
+        </p>
+        {user?.role === "ADMIN" && (
+          <Button onClick={() => setIsCreating(true)}>Create A Team</Button>
+        )}
+        {isCreating && <CreateTeamModal onClose={() => setIsCreating(false)} />}
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center bg-card p-6 rounded-xl border shadow-sm">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Team Overview</h1>
-          <p className="text-muted-foreground mt-1">Manage your team members and track their activity.</p>
+      <div className="bg-card p-6 rounded-xl border shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Team Overview</h1>
+            <p className="text-muted-foreground mt-1">
+              Select a team to manage its members and view activity logs.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Select a team" />
+              </SelectTrigger>
+              <SelectContent>
+                {teams.map((t) => (
+                  <SelectItem key={t._id} value={t._id}>
+                    {t.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {user?.role === "ADMIN" && (
+              <Button
+                variant="outline"
+                onClick={() => setIsCreating(true)}
+                className="rounded-md"
+              >
+                Create Team
+              </Button>
+            )}
+          </div>
         </div>
+      </div>
+
+      <div className="flex justify-between items-center bg-background rounded-xl p-6 border shadow-sm">
+        <h2 className="text-xl font-semibold flex items-center gap-2">
+          Members
+        </h2>
         {(user?.role === "ADMIN" || user?.role === "MANAGER") && (
-          <Button onClick={() => setIsAdding(true)} className="rounded-full px-6">
-            + Add Member
+          <Button
+            onClick={() => setIsAdding(true)}
+            className="rounded-full px-6"
+          >
+            + Add Member to this Team
           </Button>
         )}
       </div>
 
       <section className="bg-background rounded-xl p-6 border shadow-sm">
-        <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-          Members
-        </h2>
-        <TeamMemberList teamId={teamId} />
+        <TeamMemberList teamId={selectedTeamId} />
       </section>
 
       <section className="bg-background rounded-xl p-6 border shadow-sm">
         <h2 className="text-xl font-semibold mb-6">Activity Log</h2>
-        <ActivityLog teamId={teamId} />
+        <ActivityLog teamId={selectedTeamId} />
       </section>
 
       {isAdding && (
-        <AddMemberModal teamId={teamId} onClose={() => setIsAdding(false)} />
+        <AddMemberModal
+          teamId={selectedTeamId}
+          onClose={() => setIsAdding(false)}
+        />
       )}
+
+      {isCreating && <CreateTeamModal onClose={() => setIsCreating(false)} />}
     </div>
   );
 };

@@ -1,21 +1,19 @@
 import { useState } from "react";
-import { socket } from "@/socket";
+import { useSendMessageMutation } from "@/store/services/message.api";
 
-const MessageInput = () => {
+const MessageInput = ({ teamId }: { teamId: string }) => {
   const [text, setText] = useState("");
+  const [sendMessage, { isLoading }] = useSendMessageMutation();
 
-  const handleSend = () => {
-    if (!text.trim()) return;
+  const handleSend = async () => {
+    if (!text.trim() || isLoading) return;
 
-    // Check if socket is connected
-    if (!socket.connected) {
-      console.error("Socket not connected");
-      return;
+    try {
+      await sendMessage({ content: text.trim(), teamId }).unwrap();
+      setText("");
+    } catch (err) {
+      console.error("Failed to send message:", err);
     }
-
-    // Send via socket for real-time delivery
-    socket.emit("send-message", text.trim());
-    setText("");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -25,19 +23,21 @@ const MessageInput = () => {
   };
 
   return (
-    <div className="flex gap-2 p-3 border-t">
+    <div className="flex gap-2">
       <input
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyPress={handleKeyPress}
-        className="flex-1 border rounded px-3 py-2"
+        disabled={isLoading}
+        className="flex-1 border rounded px-3 py-2 bg-background focus:ring-1 focus:ring-primary outline-none"
         placeholder="Type a message..."
       />
       <button
         onClick={handleSend}
-        className="px-4 py-2 bg-primary text-white rounded"
+        disabled={isLoading || !text.trim()}
+        className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 disabled:opacity-50 transition-colors"
       >
-        Send
+        {isLoading ? "..." : "Send"}
       </button>
     </div>
   );

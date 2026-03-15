@@ -39,25 +39,19 @@ export const initSocket = (server: HttpServer) => {
     console.log("🔌 Socket connected:", user.email);
 
     // ✅ Auto join team room
-    socket.join(user.teamId.toString());
-    console.log(`👥 Joined team room: ${user.teamId}`);
-
-    /**
-     * 💬 SEND MESSAGE
-     */
-    socket.on("send-message", async (content: string) => {
-      if (!content?.trim()) return;
-
-      const message = await Message.create({
-        content,
-        senderId: user._id,
-        teamId: user.teamId,
-      });
-
-      const populatedMessage = await message.populate("senderId", "name");
-
-      // 📡 Broadcast to entire team
-      io.to(user.teamId.toString()).emit("new-message", populatedMessage);
+    if (user.teamId) {
+      socket.join(user.teamId.toString());
+    }
+    // ✅ Join specific team room (for dynamic switching)
+    socket.on("join-room", (teamId: string) => {
+      if (!teamId) return;
+      const targetRoom = teamId.toString();
+      // Basic validation: user should be admin or member of team
+      const userTeamId = user.teamId?.toString();
+      if (user.role === "ADMIN" || userTeamId === targetRoom) {
+        socket.join(targetRoom);
+        console.log(`👥 User ${user.email} joined room: ${targetRoom}`);
+      }
     });
 
     socket.on("disconnect", () => {

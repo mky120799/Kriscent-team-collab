@@ -1,25 +1,36 @@
 import type { Response, NextFunction } from "express";
 import Message from "../models/Message.model.js";
-import { type AuthRequest } from "../middlewares/auth.middleware.js";
+import type { AuthRequest } from "../middlewares/auth.middleware.js";
 import { getIO } from "../config/socket.js";
 
 export const getMessages = async (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
-    const teamId = req.user?.teamId;
+    const { teamId } = req.query;
 
     if (!teamId) {
       return res.status(400).json({ message: "teamId is required" });
     }
 
-    const messages = await Message.find({ teamId })
-      .populate("senderId", "name email role")
-      .sort({ createdAt: 1 });
+    // Basic permission check: User should be member of team or be admin
+    const userTeamId = req.user?.teamId?.toString();
+    const isAdmin = req.user?.role === "ADMIN";
 
-    res.status(200).json(messages);
+    if (!isAdmin && userTeamId !== teamId) {
+      return res
+        .status(403)
+        .json({ message: "Forbidden: You are not a member of this team" });
+    }
+
+    const messages = await Message.find({ teamId })
+      .populate("senderId", "name")
+      .sort({ createdAt: 1 })
+      .limit(100);
+
+    res.json(messages);
   } catch (error) {
     next(error);
   }
@@ -28,39 +39,38 @@ export const getMessages = async (
 export const sendMessage = async (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
-    const { content } = req.body;
-    const teamId = req.user?.teamId;
+    const { content, teamId } = req.body;
+    const senderId = req.user?._id;
 
-    if (!teamId) {
-      return res.status(400).json({ message: "teamId is required" });
-    }
-
-    if (!content || !content.trim()) {
-      return res.status(400).json({ message: "Message content is required" });
-    }
-
-    if (!req.user) {
+    if (!senderId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
+    if (!content || !teamId) {
+      return res
+        .status(400)
+        .json({ message: "Content and teamId are required" });
+    }
+
     const message = await Message.create({
-      content: content.trim(),
-      senderId: req.user._id,
+      content,
+      senderId,
       teamId,
     });
 
-    // Populate senderId before emitting
-    const populatedMessage = await message.populate(
-      "senderId",
-      "name email role"
-    );
+    const populatedMessage = await message.populate("senderId", "name");
 
-    // emit to team room
-    const io = getIO();
-    io.to(teamId.toString()).emit("new-message", populatedMessage);
+    // 📡 Real-time broadcast
+    try {
+      const io = getIO();
+      console.log(`📤 Broadcasting message to room: ${teamId.toString()}`);
+      io.to(teamId.toString()).emit("new-message", populatedMessage);
+    } catch (err) {
+      console.error("Socket broadcast failed:", err);
+    }
 
     res.status(201).json(populatedMessage);
   } catch (error) {

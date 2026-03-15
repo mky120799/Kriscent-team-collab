@@ -35,8 +35,9 @@ const Login = () => {
   });
 
   const onSubmit = async (data: LoginFormValues) => {
+    console.log(data);
     const result = await dispatch(loginThunk(data));
-
+    console.log(result);
     if (loginThunk.fulfilled.match(result)) {
       navigate("/");
     }

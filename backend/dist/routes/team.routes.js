@@ -18,5 +18,30 @@ router.get("/:teamId/members", authenticate, async (req, res) => {
         res.status(500).json({ message: "Failed to fetch team members" });
     }
 });
+// POST /api/teams/:teamId/members
+router.post("/:teamId/members", authenticate, async (req, res) => {
+    try {
+        const teamId = req.params.teamId;
+        const userId = req.body.userId;
+        const role = req.body.role;
+        if (!teamId || !userId || !mongoose.Types.ObjectId.isValid(teamId) || !mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: "Invalid teamId or userId" });
+        }
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        user.teamId = new mongoose.Types.ObjectId(teamId);
+        if (role && (role === "ADMIN" || role === "MANAGER" || role === "MEMBER")) {
+            user.role = role;
+        }
+        await user.save();
+        res.json({ message: "Member added successfully", user });
+    }
+    catch (err) {
+        console.error("Add member error:", err);
+        res.status(500).json({ message: "Failed to add team member" });
+    }
+});
 export default router;
 //# sourceMappingURL=team.routes.js.map

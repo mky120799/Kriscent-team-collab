@@ -44,6 +44,13 @@ export const taskApi = createApi({
   endpoints: (builder) => ({
     getTasksByProject: builder.query<Task[], string>({
       query: (projectId) => `/tasks?projectId=${projectId}`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ _id }) => ({ type: "Task" as const, id: _id })),
+              { type: "Task", id: "LIST" },
+            ]
+          : [{ type: "Task", id: "LIST" }],
       async onCacheEntryAdded(
         projectId,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
@@ -71,6 +78,9 @@ export const taskApi = createApi({
         method: "PUT",
         body: payload,
       }),
+      invalidatesTags: (_result, _error, { taskId }) => [
+        { type: "Task", id: taskId },
+      ],
     }),
     updateTaskStatus: builder.mutation<
       Task,
@@ -81,6 +91,9 @@ export const taskApi = createApi({
         method: "PUT",
         body: { status },
       }),
+      invalidatesTags: (_result, _error, { taskId }) => [
+        { type: "Task", id: taskId },
+      ],
     }),
     createTask: builder.mutation<Task, Partial<Task>>({
       query: (body) => ({
@@ -88,12 +101,17 @@ export const taskApi = createApi({
         method: "POST",
         body,
       }),
+      invalidatesTags: [{ type: "Task", id: "LIST" }],
     }),
     deleteTask: builder.mutation<{ message: string }, string>({
       query: (taskId) => ({
         url: `/tasks/${taskId}`,
         method: "DELETE",
       }),
+      invalidatesTags: (_result, _error, id) => [
+        { type: "Task", id },
+        { type: "Task", id: "LIST" },
+      ],
     }),
     parseAssistantCommand: builder.mutation<
       {

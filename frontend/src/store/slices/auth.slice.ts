@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { loginUser, type AuthUser } from "@/services/auth.service";
-import { connectSocket } from "@/socket";
+import { auth } from "@/config/firebase";
 
 type AuthState = {
   user: AuthUser | null;
@@ -18,23 +18,29 @@ export const loginThunk = createAsyncThunk(
   "auth/login",
   async (
     { email, password }: { email: string; password: string },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       return await loginUser({ email, password });
     } catch {
       return rejectWithValue("Invalid credentials");
     }
-  }
+  },
 );
+
+export const logoutThunk = createAsyncThunk("auth/logout", async () => {
+  await auth.signOut();
+  localStorage.removeItem("token");
+});
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    logout: (state) => {
+    // We can keep a simple logout for immediate UI feedback if needed
+    // but the Thunk will handle the side effects
+    clearUser: (state) => {
       state.user = null;
-      localStorage.removeItem("token");
     },
   },
   extraReducers: (builder) => {
@@ -46,15 +52,16 @@ const authSlice = createSlice({
       .addCase(loginThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
-        // Connect socket after successful login
-        connectSocket().catch(console.error);
       })
       .addCase(loginThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(logoutThunk.fulfilled, (state) => {
+        state.user = null;
       });
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { clearUser } = authSlice.actions;
 export default authSlice.reducer;

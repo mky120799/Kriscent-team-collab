@@ -1,4 +1,7 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAppDispatch } from "@/store/hooks";
+import { logoutThunk } from "@/store/slices/auth.slice";
+import { LogOut } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", path: "/" },
@@ -10,8 +13,16 @@ const navItems = [
 ];
 
 const Sidebar = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await dispatch(logoutThunk());
+    navigate("/login");
+  };
+
   return (
-    <aside className="w-64 bg-gray-900 text-white flex flex-col">
+    <aside className="w-64 bg-gray-900 text-white flex flex-col h-screen sticky top-0">
       {/* Logo / App Name */}
       <div className="p-6 text-xl font-bold border-b border-gray-800">
         Kriscent
@@ -36,6 +47,17 @@ const Sidebar = () => {
           </NavLink>
         ))}
       </nav>
+
+      {/* Logout */}
+      <div className="p-4 border-t border-gray-800">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-md transition"
+        >
+          <LogOut className="w-4 h-4" />
+          Logout
+        </button>
+      </div>
     </aside>
   );
 };

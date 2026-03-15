@@ -12,6 +12,7 @@ export type Message = {
     _id: string;
     name: string;
   };
+  teamId: string;
   createdAt: string;
 };
 
@@ -33,45 +34,42 @@ export const messageApi = createApi({
   }),
   tagTypes: ["Messages"],
   endpoints: (builder) => ({
-    /**
-     * 1️⃣ Get all messages for the team (teamId comes from auth token)
-     */
     getMessages: builder.query<Message[], { teamId: string }>({
-      query: () => "/messages",
+      query: ({ teamId }) => `/messages?teamId=${teamId}`,
 
       async onCacheEntryAdded(
-        _,
-        { updateCachedData, cacheDataLoaded, cacheEntryRemoved }
+        { teamId: currentTeamId },
+        { updateCachedData, cacheDataLoaded, cacheEntryRemoved },
       ) {
-        // Wait for initial fetch to complete
         await cacheDataLoaded;
 
-        // Socket handler
         const handler = (message: Message) => {
+          // Verify if message belongs to current team room
+          if (message.teamId !== currentTeamId) return;
+
           updateCachedData((draft) => {
-            draft.push(message);
+            if (!draft.find((m) => m._id === message._id)) {
+              draft.push(message);
+            }
           });
         };
 
-        // Subscribe - backend emits "new-message"
         socket.on("new-message", handler);
 
-        // Cleanup on unmount
         await cacheEntryRemoved;
         socket.off("new-message", handler);
       },
     }),
 
-    /**
-     * 2️⃣ Send message (HTTP fallback / persistence)
-     */
-    sendMessage: builder.mutation<Message, { content: string }>({
-      query: (body) => ({
-        url: "/messages",
-        method: "POST",
-        body,
-      }),
-    }),
+    sendMessage: builder.mutation<Message, { content: string; teamId: string }>(
+      {
+        query: (body) => ({
+          url: "/messages",
+          method: "POST",
+          body,
+        }),
+      },
+    ),
   }),
 });
 
