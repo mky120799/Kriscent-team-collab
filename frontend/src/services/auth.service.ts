@@ -26,7 +26,7 @@ export const registerUser = async ({
   const userCredential = await createUserWithEmailAndPassword(
     auth,
     email,
-    password
+    password,
   );
 
   const firebaseUid = userCredential.user.uid;
@@ -63,7 +63,7 @@ export const loginUser = async ({
   const userCredential = await signInWithEmailAndPassword(
     auth,
     email,
-    password
+    password,
   );
 
   const idToken = await userCredential.user.getIdToken();
@@ -79,6 +79,28 @@ export const loginUser = async ({
 
   if (!res.ok) {
     throw new Error("Login failed");
+  }
+
+  const data = await res.json();
+  return data.user as AuthUser;
+};
+
+/**
+ * GET ME
+ */
+export const getMe = async (): Promise<AuthUser> => {
+  const token = await auth.currentUser?.getIdToken();
+  if (!token) throw new Error("No firebase user found");
+
+  const res = await fetch("http://localhost:5555/api/auth/me", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to get user info");
   }
 
   const data = await res.json();

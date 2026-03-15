@@ -1,17 +1,25 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { loginUser, type AuthUser } from "@/services/auth.service";
+import { getMe, loginUser, type AuthUser } from "@/services/auth.service";
 import { auth } from "@/config/firebase";
+import { messageApi } from "../services/message.api";
+import { taskApi } from "../services/task.api";
+import { projectApi } from "../services/project.api";
+import { teamApi } from "../services/team.api";
+import { userApi } from "../services/user.api";
+import { activityApi } from "../services/activity.api";
 
 type AuthState = {
   user: AuthUser | null;
   loading: boolean;
   error: string | null;
+  isInitialized: boolean;
 };
 
 const initialState: AuthState = {
   user: null,
   loading: false,
   error: null,
+  isInitialized: false,
 };
 
 export const loginThunk = createAsyncThunk(
@@ -28,17 +36,37 @@ export const loginThunk = createAsyncThunk(
   },
 );
 
-export const logoutThunk = createAsyncThunk("auth/logout", async () => {
-  await auth.signOut();
-  localStorage.removeItem("token");
-});
+export const rehydrateUser = createAsyncThunk(
+  "auth/rehydrate",
+  async (_, { rejectWithValue }) => {
+    try {
+      return await getMe();
+    } catch (err) {
+      return rejectWithValue("Not logged in");
+    }
+  },
+);
+
+export const logoutThunk = createAsyncThunk(
+  "auth/logout",
+  async (_, { dispatch }) => {
+    await auth.signOut();
+    localStorage.removeItem("token");
+
+    // Clear all RTK Query Caches to prevent identity leaking between sessions
+    dispatch(messageApi.util.resetApiState());
+    dispatch(taskApi.util.resetApiState());
+    dispatch(projectApi.util.resetApiState());
+    dispatch(teamApi.util.resetApiState());
+    dispatch(userApi.util.resetApiState());
+    dispatch(activityApi.util.resetApiState());
+  },
+);
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    // We can keep a simple logout for immediate UI feedback if needed
-    // but the Thunk will handle the side effects
     clearUser: (state) => {
       state.user = null;
     },
@@ -52,10 +80,18 @@ const authSlice = createSlice({
       .addCase(loginThunk.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        state.isInitialized = true;
       })
       .addCase(loginThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(rehydrateUser.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.isInitialized = true;
+      })
+      .addCase(rehydrateUser.rejected, (state) => {
+        state.isInitialized = true;
       })
       .addCase(logoutThunk.fulfilled, (state) => {
         state.user = null;
