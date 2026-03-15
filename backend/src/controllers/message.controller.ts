@@ -45,6 +45,10 @@ export const sendMessage = async (
     const { content, teamId } = req.body;
     const senderId = req.user?._id;
 
+    console.log(
+      `[MESSAGE PROBE] Sending message from: ${req.user?.name} (${senderId}), Content: "${content.substring(0, 20)}..."`,
+    );
+
     if (!senderId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
