@@ -29,7 +29,10 @@ export const loginThunk = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-      return await loginUser({ email, password });
+      const user = await loginUser({ email, password });
+      const token = await auth.currentUser?.getIdToken();
+      if (token) localStorage.setItem("token", token);
+      return user;
     } catch {
       return rejectWithValue("Invalid credentials");
     }
@@ -40,7 +43,10 @@ export const rehydrateUser = createAsyncThunk(
   "auth/rehydrate",
   async (_, { rejectWithValue }) => {
     try {
-      return await getMe();
+      const user = await getMe();
+      const token = await auth.currentUser?.getIdToken();
+      if (token) localStorage.setItem("token", token);
+      return user;
     } catch (err) {
       return rejectWithValue("Not logged in");
     }
@@ -69,6 +75,15 @@ const authSlice = createSlice({
   reducers: {
     clearUser: (state) => {
       state.user = null;
+      state.isInitialized = true;
+    },
+    setInitialized: (state, action: { payload: boolean }) => {
+      state.isInitialized = action.payload;
+    },
+    updateUserName: (state, action: { payload: string }) => {
+      if (state.user) {
+        state.user.name = action.payload;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -99,5 +114,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearUser } = authSlice.actions;
+export const { clearUser, updateUserName, setInitialized } = authSlice.actions;
 export default authSlice.reducer;

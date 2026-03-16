@@ -10,6 +10,7 @@ type Props = {
 
 const AddMemberModal = ({ teamId, onClose }: Props) => {
   const [search, setSearch] = useState("");
+  const [selectedRole, setSelectedRole] = useState("MEMBER");
   const { data: users = [], isLoading } = useSearchUsersQuery(search, {
     skip: search.length < 3,
   });
@@ -17,7 +18,7 @@ const AddMemberModal = ({ teamId, onClose }: Props) => {
 
   const handleAdd = async (userId: string) => {
     try {
-      await addMember({ teamId, userId, role: "MEMBER" }).unwrap();
+      await addMember({ teamId, userId, role: selectedRole }).unwrap();
       onClose();
     } catch (err) {
       console.error("Failed to add member:", err);
@@ -31,7 +32,33 @@ const AddMemberModal = ({ teamId, onClose }: Props) => {
 
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium mb-1 block">Search by name or email</label>
+            <label className="text-sm font-medium mb-1 block text-muted-foreground">
+              1. Select Role
+            </label>
+            <div className="flex gap-2">
+              <Button
+                variant={selectedRole === "MEMBER" ? "default" : "outline"}
+                size="sm"
+                className="flex-1"
+                onClick={() => setSelectedRole("MEMBER")}
+              >
+                Member
+              </Button>
+              <Button
+                variant={selectedRole === "MANAGER" ? "default" : "outline"}
+                size="sm"
+                className="flex-1"
+                onClick={() => setSelectedRole("MANAGER")}
+              >
+                Manager
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium mb-1 block text-muted-foreground">
+              2. Search User
+            </label>
             <input
               className="w-full border rounded-md p-2 bg-background focus:ring-2 focus:ring-primary outline-none"
               placeholder="Min 3 characters..."
@@ -43,17 +70,24 @@ const AddMemberModal = ({ teamId, onClose }: Props) => {
           <div className="max-h-60 overflow-y-auto border rounded-md p-2 space-y-2">
             {isLoading && <p className="text-sm text-center">Searching...</p>}
             {search.length >= 3 && users.length === 0 && !isLoading && (
-              <p className="text-sm text-center text-muted-foreground">No users found.</p>
+              <p className="text-sm text-center text-muted-foreground">
+                No users found.
+              </p>
             )}
             {users.map((user) => (
-              <div key={user._id} className="flex justify-between items-center p-2 hover:bg-muted rounded transition-colors">
+              <div
+                key={user._id}
+                className="flex justify-between items-center p-2 hover:bg-muted rounded transition-colors"
+              >
                 <div>
                   <p className="text-sm font-medium">{user.name}</p>
-                  <p className="text-[10px] text-muted-foreground">{user.email}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {user.email}
+                  </p>
                 </div>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
+                <Button
+                  size="sm"
+                  variant="outline"
                   disabled={isAdding || user.teamId === teamId}
                   onClick={() => handleAdd(user._id)}
                 >

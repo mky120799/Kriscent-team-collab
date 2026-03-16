@@ -89,3 +89,60 @@ export const createUser = async (
     next(error);
   }
 };
+
+export const updateUserRole = async (
+  req: any, // Using any for AuthRequest compatibility in this context
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    // Validate role
+    if (!["ADMIN", "MANAGER", "MEMBER"].includes(role)) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    // Check if user exists
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update role
+    user.role = role as "ADMIN" | "MANAGER" | "MEMBER";
+    await user.save();
+
+    res.json({ message: "User role updated successfully", user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateProfile = async (
+  req: any, // AuthRequest
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const userId = req.user?._id;
+    const { name } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ message: "Name is required" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.name = name;
+    await user.save();
+
+    res.json({ message: "Profile updated successfully", user });
+  } catch (error) {
+    next(error);
+  }
+};

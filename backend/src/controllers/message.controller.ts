@@ -67,16 +67,27 @@ export const sendMessage = async (
 
     const populatedMessage = await message.populate("senderId", "name");
 
+    // Defensive: Force correct sender info if population is flaky
+    const responseData = {
+      ...populatedMessage.toObject(),
+      senderId: {
+        _id: senderId.toString(),
+        name: req.user?.name || "Unknown User",
+      },
+    };
+
     // 📡 Real-time broadcast
     try {
       const io = getIO();
-      console.log(`📤 Broadcasting message to room: ${teamId.toString()}`);
-      io.to(teamId.toString()).emit("new-message", populatedMessage);
+      console.log(
+        `📤 [DEFENSIVE] Broadcasting message from ${responseData.senderId.name} to room: ${teamId.toString()}`,
+      );
+      io.to(teamId.toString()).emit("new-message", responseData);
     } catch (err) {
       console.error("Socket broadcast failed:", err);
     }
 
-    res.status(201).json(populatedMessage);
+    res.status(201).json(responseData);
   } catch (error) {
     next(error);
   }

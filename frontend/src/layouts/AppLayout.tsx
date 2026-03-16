@@ -4,15 +4,39 @@ import Sidebar from "../components/navigation/Sidebar";
 import Navbar from "../components/navigation/Navbar";
 import { connectSocket } from "@/socket";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { rehydrateUser } from "@/store/slices/auth.slice";
+import { rehydrateUser, clearUser } from "@/store/slices/auth.slice";
+import { auth } from "@/config/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 const AppLayout = () => {
   const dispatch = useAppDispatch();
   const { isInitialized } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    dispatch(rehydrateUser());
-    connectSocket();
+    let isRehydrating = false;
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      // Avoid infinite loops or redundant calls if already processing
+      if (isRehydrating) return;
+
+      if (firebaseUser) {
+        console.log("🔥 Firebase User detected. Rehydrating session...");
+        isRehydrating = true;
+        try {
+          await dispatch(rehydrateUser()).unwrap();
+          connectSocket();
+        } catch (err) {
+          console.error("❌ Rehydration failed:", err);
+        } finally {
+          isRehydrating = false;
+        }
+      } else {
+        console.log("👻 No Firebase User. Marking as unauthenticated.");
+        dispatch(clearUser()); // This now sets isInitialized to true
+      }
+    });
+
+    return () => unsubscribe();
   }, [dispatch]);
 
   if (!isInitialized) {

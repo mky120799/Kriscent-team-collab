@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 const MessageItem = ({ message }: { message: Message }) => {
   const { user } = useAppSelector((state: RootState) => state.auth);
-  const isMe = message.senderId?._id === user?._id;
+  const isMe = message.senderId?._id?.toString() === user?._id?.toString();
 
   return (
     <div

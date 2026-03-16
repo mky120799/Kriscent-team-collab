@@ -53,6 +53,14 @@ export const teamApi = createApi({
     getActivityLogs: builder.query<Activity[], string>({
       query: (teamId) => `/activity?teamId=${teamId}`,
     }),
+    updateMemberRole: builder.mutation<void, { userId: string; role: string }>({
+      query: ({ userId, role }) => ({
+        url: `/users/${userId}/role`,
+        method: "PATCH",
+        body: { role },
+      }),
+      invalidatesTags: ["TeamMember"],
+    }),
   }),
 });
 
@@ -62,4 +70,5 @@ export const {
   useGetTeamMembersQuery,
   useGetActivityLogsQuery,
   useAddTeamMemberMutation,
+  useUpdateMemberRoleMutation,
 } = teamApi;

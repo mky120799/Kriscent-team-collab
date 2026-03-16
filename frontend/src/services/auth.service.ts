@@ -6,6 +6,8 @@ import { auth } from "@/config/firebase";
 
 export type AuthUser = {
   _id: string;
+  name: string;
+  email: string;
   role: "ADMIN" | "MANAGER" | "MEMBER";
   teamId: string | null;
   firebaseUid: string;
