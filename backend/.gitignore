@@ -1,3 +1,4 @@
 .env
 node_modules
-src/config/kriscent-collab-firebase-adminsdk-fbsvc-d3e1e533fa.json
+dist/
+src/config/*.json
