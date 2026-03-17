@@ -5,11 +5,13 @@ import { authenticate } from "../middlewares/auth.middleware.js";
 const router = express.Router();
 router.get("/", authenticate, authorizeRoles("ADMIN", "MANAGER"), async (req, res) => {
     const user = req.user;
-    if (!user || !user.teamId) {
+    const queriedTeamId = req.query.teamId;
+    const targetTeamId = queriedTeamId || user?.teamId;
+    if (!user || !targetTeamId) {
         return res.status(400).json({ error: "Missing user or teamId" });
     }
     const logs = await ActivityLog.find({
-        teamId: user.teamId,
+        teamId: targetTeamId,
     })
         .populate("performedBy", "name email")
         .sort({ createdAt: -1 });

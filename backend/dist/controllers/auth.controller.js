@@ -1,5 +1,17 @@
 import admin from "../config/firebaseAdmin.js";
 import User from "../models/User.model.js";
+export const getMe = async (req, res) => {
+    try {
+        const user = req.user;
+        if (!user)
+            return res.status(401).json({ message: "Not authenticated" });
+        res.json({ user });
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to get user info" });
+    }
+};
 export const login = async (req, res) => {
     try {
         const { idToken } = req.body; // Token sent from frontend
@@ -12,7 +24,7 @@ export const login = async (req, res) => {
         if (!user)
             return res.status(401).json({ message: "User not found" });
         // ✅ Create session
-        console.log("SESSION BEFORE:", req.session, 'this is the session id', req.session.id);
+        console.log("SESSION BEFORE:", req.session, "this is the session id", req.session.id);
         req.session.user = {
             id: user._id.toString(),
             email: user.email,

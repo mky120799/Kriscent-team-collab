@@ -9,7 +9,13 @@ export const getUsers = async (req, res, next) => {
         if (projectId && typeof projectId === "string") {
             const project = await Project.findById(projectId);
             if (project) {
-                query.teamId = project.teamId;
+                const team = await Team.findById(project.teamId);
+                if (team) {
+                    query.$or = [{ teamId: project.teamId }, { _id: team.adminId }];
+                }
+                else {
+                    query.teamId = project.teamId;
+                }
             }
             else {
                 return res.status(404).json({ message: "Project not found" });
@@ -61,6 +67,49 @@ export const createUser = async (req, res, next) => {
             teamId: user.teamId ? user.teamId.toString() : null,
             firebaseUid: user.firebaseUid,
         });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+export const updateUserRole = async (req, // Using any for AuthRequest compatibility in this context
+res, next) => {
+    try {
+        const { id } = req.params;
+        const { role } = req.body;
+        // Validate role
+        if (!["ADMIN", "MANAGER", "MEMBER"].includes(role)) {
+            return res.status(400).json({ message: "Invalid role" });
+        }
+        // Check if user exists
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        // Update role
+        user.role = role;
+        await user.save();
+        res.json({ message: "User role updated successfully", user });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+export const updateProfile = async (req, // AuthRequest
+res, next) => {
+    try {
+        const userId = req.user?._id;
+        const { name } = req.body;
+        if (!name) {
+            return res.status(400).json({ message: "Name is required" });
+        }
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        user.name = name;
+        await user.save();
+        res.json({ message: "Profile updated successfully", user });
     }
     catch (error) {
         next(error);

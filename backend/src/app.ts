@@ -16,6 +16,11 @@ import { errorHandler } from "./middlewares/error.middleware.js";
 import { sessionMiddleware } from "./config/session.js";
 
 const app = express();
+app.set("trust proxy", 1);
+
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
 
 app.use(
   cors({
