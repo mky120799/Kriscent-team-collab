@@ -2,11 +2,9 @@ import mongoose from "mongoose";
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI as string,
-        {
-            dbName:"Krescent-collab"
-        }
-    );
+    await mongoose.connect(process.env.MONGO_URI as string, {
+      dbName: "Krescent-collab",
+    });
     console.log("MongoDB connected");
   } catch (error) {
     console.error("MongoDB connection failed", error);
