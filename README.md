@@ -106,3 +106,5 @@ Login/Register using Firebase Auth. The first user to register will automaticall
 1. **Fallback AI Parser**: To ensure the platform runs smoothly without requiring external API keys immediately, the AI Assistant includes a built-in regex-based fallback parser.
 2. **RTK Query Auto-Caching**: Integrating Socket.IO directly into RTK Query cache invalidation to provide seamless real-time KanBan updates across multiple browser tabs without heavy manual state synchronization.
 3. **Session-based Firebase Auth mapping**: Securing endpoints smoothly by combining Firebase JWTs via headers with session-backed context.
+
+<-a Final Deployment Push -->
