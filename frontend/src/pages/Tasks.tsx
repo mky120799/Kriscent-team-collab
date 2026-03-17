@@ -4,7 +4,13 @@ import CreateTaskButton from "../components/tasks/CreateTaskButton";
 import AssistantInput from "../components/assistant/AssistantInput";
 import { useAppSelector } from "@/store/hooks";
 import { useGetProjectsQuery } from "@/store/services/project.api";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const Tasks = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -51,7 +57,9 @@ const Tasks = () => {
         <div className="flex flex-1 items-center justify-center border-2 border-dashed rounded-lg bg-muted/20">
           <div className="text-center space-y-2">
             <h2 className="text-lg font-medium">No Project Selected</h2>
-            <p className="text-muted-foreground">Select a project from the dropdown above to view tasks.</p>
+            <p className="text-muted-foreground">
+              Select a project from the dropdown above to view tasks.
+            </p>
           </div>
         </div>
       )}
