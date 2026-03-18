@@ -14,6 +14,7 @@ import assistantRoutes from "./routes/assistant.routes.js";
 
 import { errorHandler } from "./middlewares/error.middleware.js";
 import { sessionMiddleware } from "./config/session.js";
+import "./config/firebaseAdmin.js";
 
 const app = express();
 app.set("trust proxy", 1);
