@@ -1,5 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getMe, loginUser, type AuthUser } from "@/services/auth.service";
+import {
+  getMe,
+  loginUser,
+  registerUser,
+  type AuthUser,
+} from "@/services/auth.service";
 import { auth } from "@/config/firebase";
 import { messageApi } from "../services/message.api";
 import { taskApi } from "../services/task.api";
@@ -35,6 +40,23 @@ export const loginThunk = createAsyncThunk(
       return user;
     } catch {
       return rejectWithValue("Invalid credentials");
+    }
+  },
+);
+
+export const registerThunk = createAsyncThunk(
+  "auth/register",
+  async (
+    data: { name: string; email: string; password: string },
+    { rejectWithValue },
+  ) => {
+    try {
+      const user = await registerUser(data);
+      const token = await auth.currentUser?.getIdToken();
+      if (token) localStorage.setItem("token", token);
+      return user;
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Registration failed");
     }
   },
 );
@@ -110,6 +132,19 @@ const authSlice = createSlice({
       })
       .addCase(logoutThunk.fulfilled, (state) => {
         state.user = null;
+      })
+      .addCase(registerThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(registerThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.isInitialized = true;
+      })
+      .addCase(registerThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
       });
   },
 });

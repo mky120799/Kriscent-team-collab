@@ -5,9 +5,9 @@ import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { registerUser } from "@/services/auth.service";
-import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { registerThunk } from "@/store/slices/auth.slice";
+import { useNavigate, Link } from "react-router-dom";
 const registerSchema = z
   .object({
     name: z.string().min(2, "Name must be at least 2 characters"),
@@ -23,8 +23,9 @@ const registerSchema = z
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 const Register = () => {
-  const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { loading, error } = useAppSelector((state) => state.auth);
 
   const {
     register,
@@ -35,20 +36,15 @@ const Register = () => {
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
-    try {
-      setLoading(true);
-
-      await registerUser({
+    const result = await dispatch(
+      registerThunk({
         name: data.name,
         email: data.email,
         password: data.password,
-      });
-      navigate('/')
-      console.log("User registered successfully");
-    } catch (error) {
-      console.error("Registration failed:", error);
-    } finally {
-      setLoading(false);
+      }),
+    );
+    if (registerThunk.fulfilled.match(result)) {
+      navigate("/");
     }
   };
 
@@ -70,7 +66,9 @@ const Register = () => {
               <Label htmlFor="name">Full Name</Label>
               <Input id="name" {...register("name")} disabled={loading} />
               {errors.name && (
-                <p className="text-sm text-destructive">{errors.name.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.name.message}
+                </p>
               )}
             </div>
 
@@ -119,9 +117,24 @@ const Register = () => {
               )}
             </div>
 
+            {/* BACKEND ERROR */}
+            {error && (
+              <p className="text-sm text-destructive text-center">{error}</p>
+            )}
+
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Creating account..." : "Create Account"}
             </Button>
+
+            <div className="text-center text-sm">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="text-primary hover:underline font-medium"
+              >
+                Login
+              </Link>
+            </div>
           </form>
         </CardContent>
       </Card>
