@@ -23,9 +23,16 @@ app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.FRONTEND_URL,
+].filter(Boolean) as string[];
+
+console.log("✅ CORS allowed origins:", allowedOrigins);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
   }),
 );
