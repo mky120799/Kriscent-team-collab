@@ -44,6 +44,37 @@ An intelligent interface for managing your workflow using natural language.
 - **Real-Time Team Chat**: A dedicated channel for each team to discuss projects instantly.
 - **Activity Logs**: See a live feed of who did what (e.g., "John moved Task #402 to Done").
 
+- **🌙 Dark Mode**: System-aware dark/light mode support for a comfortable experience.
+
+---
+
+## 🛡️ Role-Based Access Control (RBAC)
+
+The platform implements a strict RBAC system to ensure data integrity and security. Permissions are enforced both on the Frontend UI (conditional rendering) and the Backend API (middleware validation).
+
+### 👑 Admin
+*Highest authority; intended for organizational leaders.*
+- **Project Control**: Create, edit, and delete any project in the system.
+- **Team Management**: Create teams and manage overall team structures.
+- **Member Management**: Add/remove members from any team and change user roles.
+- **AI Assistant**: Full access to create and update tasks using natural language.
+- **Full CRUD**: Complete control over all tasks, projects, and users.
+
+### 💼 Manager
+*Project leads and team supervisors.*
+- **Project Visibility**: View projects they are assigned to.
+- **Task Management**: Create new tasks and assign them to team members.
+- **Team Coordination**: Add/invite members to their specific teams.
+- **AI Assistant**: Fully enabled for rapid task creation and status updates.
+- **Monitoring**: View detailed activity logs and team chat history.
+
+### 👤 Member
+*Core contributors and team players.*
+- **Task Execution**: Update task status (e.g., moving Todo → Done) on the Kanban board.
+- **Communication**: Full access to real-time team chat.
+- **Visibility**: View project goals, team members, and their own assigned tasks.
+- **Restrictions**: Cannot create/delete projects or teams. AI Assistant creation is restricted.
+
 ---
 
 ## 🛠️ Tech Stack
