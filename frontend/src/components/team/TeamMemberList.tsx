@@ -4,7 +4,11 @@ import TeamMemberCard from "./TeamMemberCard";
 type Props = { teamId: string };
 
 const TeamMemberList = ({ teamId }: Props) => {
-  const { data: members, isLoading, error } = useGetTeamMembersQuery(teamId);
+  const {
+    data: members,
+    isLoading,
+    error,
+  } = useGetTeamMembersQuery(teamId, { skip: !teamId });
 
   if (isLoading) return <p>Loading team members...</p>;
   if (error) return <p>Failed to load members.</p>;
