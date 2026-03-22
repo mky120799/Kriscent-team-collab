@@ -1,110 +1,158 @@
-# Kriscent Team Collab
+# 🚀 Kriscent Team Collab
 
-A real-time team collaboration platform built for the Kriscent Techno Hub Pvt Ltd assessment. This platform allows teams to manage projects, create and assign tasks, and track progress live. It features role-based access control (Admin, Manager, Member), Kanban boards for task management, a real-time team chat system, and a built-in AI assistant for managing tasks using natural language.
+A high-performance, real-time team collaboration platform designed for modern project management. This platform combines real-time data synchronization, AI-powered task management, and a premium responsive UI, built as part of the Kriscent Techno Hub Pvt Ltd assessment.
 
-## Features
+### 🌐 Live Deployment
+- **Frontend (Vercel)**: [https://kriscent-team-collab.vercel.app](https://kriscent-team-collab.vercel.app)
+- **Backend API (Railway)**: [https://kriscent-backend-production.up.railway.app](https://kriscent-backend-production.up.railway.app)
 
-- **Authentication & Authorization**: Firebase authentication with Role-Based Access Control (RBAC). Roles include `ADMIN`, `MANAGER`, and `MEMBER`.
-- **Project Management**: Admins and Managers can create, update, and delete projects for their team.
-- **Task Management**: Real-time Kanban board with drag-and-drop functionality (`@hello-pangea/dnd`).
-- **AI Task Assistant**: A natural language assistant that lets Managers and Admins quickly create or update tasks (e.g., "Create a task for API Integration", "Move task API Integration to In Progress"). Powered by Gemini AI (with a built-in fallback parser).
-- **Real-Time Collaboration**: Live task updates and team chat functionality powered by `Socket.IO`.
-- **Responsive & Dark Mode UI**: Built with React, Tailwind CSS, and Shadcn UI.
+---
 
-## Tech Stack
+## 📖 Table of Contents
+- [✨ Key Features](#✨-key-features)
+- [🛠️ Tech Stack](#🛠️-tech-stack)
+- [🏗️ Project Architecture](#🏗️-project-architecture)
+- [📡 API Documentation](#📡-api-documentation)
+- [🚀 Quick Start](#🚀-quick-start)
+- [🧪 Technical Highlights](#🧪-technical-highlights)
+- [⚙️ Configuration](#⚙️-configuration)
+
+---
+
+## ✨ Key Features
+
+### 🔐 Robust Authentication & RBAC
+Custom role-based access control built on top of Firebase Authentication.
+- **Admin**: Create teams, manages all projects, and has full system visibility.
+- **Manager**: Manage assigned teams, create/edit tasks, and assign members.
+- **Member**: Focus on assigned tasks and participate in real-time chat.
+
+### 📋 Real-Time Kanban Board
+A highly interactive task management board with instant synchronization across all users.
+- **Drag-and-Drop**: Built using `@hello-pangea/dnd` for smooth, accessible interactions.
+- **Live Updates**: All task status changes are broadcasted via Socket.IO, meaning zero-refresh is required for teammates to see your progress.
+
+### 🤖 AI Task Assistant
+An intelligent interface for managing your workflow using natural language.
+- **Powered by Gemini AI**: Leverages state-of-the-art LLMs to understand complex commands.
+- **Sample Commands**: 
+  - *"Assign the API refactor task to John"*
+  - *"Remind me to fix the login bug under the high-priority project"*
+- **Smart Fallback**: Includes a regex-based parser to ensure features work even if AI quotas are hit.
+
+### 💬 Team Communication
+- **Real-Time Team Chat**: A dedicated channel for each team to discuss projects instantly.
+- **Activity Logs**: See a live feed of who did what (e.g., "John moved Task #402 to Done").
+
+---
+
+## 🛠️ Tech Stack
 
 ### Frontend
-
 - **Framework**: React 19 + TypeScript + Vite
-- **Styling**: Tailwind CSS + Shadcn UI
-- **State Management**: Redux Toolkit (RTK Query for API calls)
-- **Routing**: React Router v7
+- **State**: Redux Toolkit (RTK) + RTK Query (Optimistic UI & Cache Sync)
+- **Styling**: Tailwind CSS + Shadcn UI (Customized Component Library)
 - **Real-time**: Socket.IO Client
-- **Auth**: Firebase Auth
+- **Auth**: Firebase Auth Integration
 
 ### Backend
+- **Environment**: Node.js + Express (ESM)
+- **Database**: MongoDB (Mongoose ODM)
+- **Real-time**: Socket.IO Server
+- **AI**: Google Generative AI (Gemini) SDK
+- **Validation**: Joi (Body) & Zod (Config)
 
-- **Environment**: Node.js + Express
-- **Database**: MongoDB with Mongoose
-- **Validation**: Joi
-- **Real-time**: Socket.IO
-- **AI Integration**: Google Generative AI (Gemini)
+---
 
-## Setup Instructions
+## 🏗️ Project Architecture
 
-### Prerequisites
+```text
+kriscent-team-collab/
+├── frontend/                 # React client
+│   ├── src/
+│   │   ├── components/       # UI/Shared & Feature-specific components
+│   │   ├── config/           # API & Firebase configurations
+│   │   ├── hooks/            # Custom React hooks (auth, socket)
+│   │   ├── layouts/          # Responsive App & Auth layouts
+│   │   ├── pages/            # View components (Dashboard, Tasks, etc.)
+│   │   ├── store/            # Redux & RTK Query Services
+│   │   └── types/            # TypeScript interfaces
+├── backend/                  # Node.js server
+│   ├── src/
+│   │   ├── controllers/      # Request handlers
+│   │   ├── middlewares/      # Auth, RBAC, and error handlers
+│   │   ├── models/           # Mongoose schemas
+│   │   ├── routes/           # API route definitions
+│   │   ├── services/         # Business logic & AI integration
+│   │   └── app.ts            # Express app initialization
+```
 
-- Node.js (v18+)
-- MongoDB (Local or Atlas URL)
-- Firebase Project for Authentication
+---
 
-### 1. Clone the repository
+## 📡 API Documentation
 
+Base URL: `https://kriscent-backend-production.up.railway.app/api`
+
+### 🔑 Authentication
+- `POST /auth/login` - Local + Firebase verification
+- `POST /auth/register` - New user creation (Auto-admins first user)
+
+### 📂 Projects & Teams
+- `GET /projects` - List all projects (RBAC filtered)
+- `POST /projects` - Create new project (Admin/Manager only)
+- `GET /teams/:id/members` - Fetch all members of a specific team
+
+### ✅ Tasks
+- `GET /tasks?projectId=...` - Fetch tasks for a project
+- `PUT /tasks/:id` - Update task status or details
+- `POST /tasks` - Create a new task
+
+### 💬 Messages & AI
+- `GET /messages?teamId=...` - Fetch team chat history
+- `POST /assistant/process` - Process natural language commands via Gemini
+
+---
+
+## 🚀 Quick Start
+
+### 1. Pre-requisites
+- **Node.js**: v18 or higher
+- **MongoDB**: Active instance (Atlas or local)
+- **Firebase**: Project with Authentication enabled
+
+### 2. Installation
 ```bash
-git clone <repository-url>
+# Clone
+git clone https://github.com/mky120799/kriscent-team-collab.git
 cd kriscent-team-collab
+
+# Backend
+cd backend && npm install
+cp .env.example .env
+
+# Frontend
+cd ../frontend && npm install
+cp .env.example .env
 ```
 
-### 2. Backend Setup
-
+### 3. Running Locally
 ```bash
-cd backend
-npm install
+# Terminal 1: Backend
+cd backend && npm run dev
+
+# Terminal 2: Frontend
+cd frontend && npm run dev
 ```
 
-Create a `.env` file in the `backend` directory:
+---
 
-```env
-PORT=5555
-MONGO_URI=mongodb://127.0.0.1:27017/Krescent-collab
-SESSION_SECRET=your_super_secret_key
-# Optional: Provide Google Gemini API Key for advanced AI features. If omitted, a basic parser is used.
-GEMINI_API_KEY=your_gemini_api_key
-```
+## 🧪 Technical Highlights
 
-Run the backend:
+1.  **Smart API Routing**: Custom sanitized API base URL configuration that handles production/local environments seamlessly, ensuring no more "double-slash" 404s.
+2.  **Socket-Driven Caching**: RTK Query cache invalidation synced with Socket.IO events for "zero-refresh" updates across multiple tabs.
+3.  **Graceful AI Degredation**: Includes a regex-based fallback parser to ensure features work even if AI keys are missing or quotas are reached.
+4.  **Responsive Sidebar**: Custom-built mobile drawer system in `AppLayout` for optimal mobile navigation.
 
-```bash
-npm run dev
-```
+---
 
-### 3. Frontend Setup
-
-Open a new terminal and navigate to the frontend directory:
-
-```bash
-cd frontend
-npm install
-```
-
-Create a `.env` file in the `frontend` directory:
-
-```env
-VITE_API_URL=http://localhost:5555/api
-
-VITE_FIREBASE_API_KEY=your_firebase_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
-VITE_FIREBASE_APP_ID=your_firebase_app_id
-```
-
-Run the frontend:
-
-```bash
-npm run dev
-```
-
-### 4. Running the app
-
-Once both servers are running, open your browser and go to `http://localhost:5173`.
-Login/Register using Firebase Auth. The first user to register will automatically be assigned the `ADMIN` role.
-
-## Extra Features Added
-
-1. **Fallback AI Parser**: To ensure the platform runs smoothly without requiring external API keys immediately, the AI Assistant includes a built-in regex-based fallback parser.
-2. **RTK Query Auto-Caching**: Integrating Socket.IO directly into RTK Query cache invalidation to provide seamless real-time KanBan updates across multiple browser tabs without heavy manual state synchronization.
-3. **Session-based Firebase Auth mapping**: Securing endpoints smoothly by combining Firebase JWTs via headers with session-backed context.
-
-<-a Final Deployment Push -->
+Built with ❤️ by **MKY**
