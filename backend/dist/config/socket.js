@@ -4,10 +4,14 @@ import admin from "./firebaseAdmin.js";
 import User from "../models/User.model.js";
 import Message from "../models/Message.model.js";
 let io;
+const allowedOrigins = [
+    "http://localhost:5173",
+    process.env.FRONTEND_URL,
+].filter(Boolean);
 export const initSocket = (server) => {
     io = new Server(server, {
         cors: {
-            origin: process.env.FRONTEND_URL || "http://localhost:5173",
+            origin: allowedOrigins,
             methods: ["GET", "POST"],
             credentials: true,
         },

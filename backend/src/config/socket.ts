@@ -14,7 +14,22 @@ const allowedOrigins = [
 export const initSocket = (server: HttpServer) => {
   io = new Server(server, {
     cors: {
-      origin: allowedOrigins,
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+
+        const normalizedOrigin = origin.replace(/\/$/, "");
+        const isAllowed = allowedOrigins.some((allowed) => {
+          const normalizedAllowed = (allowed || "").replace(/\/$/, "");
+          return normalizedAllowed === normalizedOrigin;
+        });
+
+        if (isAllowed) {
+          callback(null, true);
+        } else {
+          console.warn(`⚠️ Socket CORS blocked for origin: ${origin}`);
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
       methods: ["GET", "POST"],
       credentials: true,
     },
