@@ -3,6 +3,7 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { auth } from "@/config/firebase";
+import { API_BASE_URL } from "@/config/api";
 
 export type AuthUser = {
   _id: string;
@@ -33,7 +34,7 @@ export const registerUser = async ({
 
   const firebaseUid = userCredential.user.uid;
 
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+  const res = await fetch(`${API_BASE_URL}/users`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -70,7 +71,7 @@ export const loginUser = async ({
 
   const idToken = await userCredential.user.getIdToken();
 
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+  const res = await fetch(`${API_BASE_URL}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -94,7 +95,7 @@ export const getMe = async (): Promise<AuthUser> => {
   const token = await auth.currentUser?.getIdToken();
   if (!token) throw new Error("No firebase user found");
 
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
+  const res = await fetch(`${API_BASE_URL}/auth/me`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,

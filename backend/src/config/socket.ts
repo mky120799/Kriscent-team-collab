@@ -8,6 +8,7 @@ let io: Server;
 
 const allowedOrigins = [
   "http://localhost:5173",
+  "https://kriscent-team-collab.vercel.app",
   process.env.FRONTEND_URL,
 ].filter(Boolean) as string[];
 
@@ -19,7 +20,7 @@ export const initSocket = (server: HttpServer) => {
 
         const normalizedOrigin = origin.replace(/\/$/, "");
         const isAllowed = allowedOrigins.some((allowed) => {
-          const normalizedAllowed = (allowed || "").replace(/\/$/, "");
+          const normalizedAllowed = (allowed || "").replace(/\/$/, "").trim();
           return normalizedAllowed === normalizedOrigin;
         });
 
@@ -27,7 +28,8 @@ export const initSocket = (server: HttpServer) => {
           callback(null, true);
         } else {
           console.warn(`⚠️ Socket CORS blocked for origin: ${origin}`);
-          callback(new Error("Not allowed by CORS"));
+          console.info(`Allowed origins were: ${JSON.stringify(allowedOrigins)}`);
+          callback(null, false);
         }
       },
       methods: ["GET", "POST"],

@@ -1,19 +1,9 @@
 import { io } from "socket.io-client";
 import { auth } from "@/config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { ROOT_URL } from "@/config/api";
 
-// Extract the base URL from VITE_API_URL (removes /api suffix if present)
-const getSocketUrl = () => {
-  const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5555";
-  try {
-    const url = new URL(apiUrl);
-    return `${url.protocol}//${url.host}`;
-  } catch (e) {
-    return apiUrl.replace(/\/api$/, "");
-  }
-};
-
-export const socket = io(getSocketUrl(), {
+export const socket = io(ROOT_URL, {
   autoConnect: false, // don’t connect immediately
   transports: ["websocket"],
 });
