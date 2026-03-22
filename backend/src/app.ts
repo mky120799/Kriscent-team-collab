@@ -25,6 +25,7 @@ app.get("/health", (req, res) => {
 
 const allowedOrigins = [
   "http://localhost:5173",
+  "https://kriscent-team-collab.vercel.app",
   process.env.FRONTEND_URL,
 ].filter(Boolean) as string[];
 
