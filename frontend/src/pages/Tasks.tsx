@@ -20,15 +20,15 @@ const Tasks = () => {
   const role = user?.role;
 
   return (
-    <div className="p-6 space-y-4 flex flex-col h-full">
-      <div className="flex justify-between items-center bg-card p-4 rounded-lg border shadow-sm">
-        <div className="flex items-center gap-4">
+    <div className="p-4 md:p-6 space-y-4 flex flex-col h-full">
+      <div className="flex flex-col lg:flex-row justify-between lg:items-center bg-card p-4 rounded-lg border shadow-sm gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
           <h1 className="text-2xl font-bold">Tasks</h1>
           <Select
             value={projectId || ""}
             onValueChange={(val) => navigate(`/tasks/${val}`)}
           >
-            <SelectTrigger className="w-[250px]">
+            <SelectTrigger className="w-full sm:w-[250px]">
               <SelectValue placeholder="Select a project" />
             </SelectTrigger>
             <SelectContent>
@@ -41,7 +41,9 @@ const Tasks = () => {
           </Select>
         </div>
         {projectId && (role === "ADMIN" || role === "MANAGER") && (
-          <CreateTaskButton projectId={projectId} role={role} />
+          <div className="w-full lg:w-auto">
+             <CreateTaskButton projectId={projectId} role={role} />
+          </div>
         )}
       </div>
 

@@ -22,7 +22,7 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="w-64 bg-gray-900 text-white flex flex-col h-screen sticky top-0">
+    <aside className="hidden md:flex w-64 bg-gray-900 text-white flex-col h-screen sticky top-0">
       {/* Logo / App Name */}
       <div className="p-6 text-xl font-bold border-b border-gray-800">
         Kriscent

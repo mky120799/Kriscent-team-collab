@@ -18,17 +18,17 @@ const Projects = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center bg-card p-6 rounded-xl border shadow-sm">
+    <div className="p-4 md:p-6 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-card p-4 md:p-6 rounded-xl border shadow-sm">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Projects</h1>
+          <p className="text-muted-foreground mt-1 text-sm md:text-base">
             Manage and track your team's initiatives.
           </p>
         </div>
         <Button
           onClick={() => setOpenModal(true)}
-          className="rounded-full px-6"
+          className="rounded-full px-6 w-full sm:w-auto"
         >
           + New Project
         </Button>

@@ -59,18 +59,18 @@ const Team = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="bg-card p-6 rounded-xl border shadow-sm space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+    <div className="p-4 md:p-6 space-y-6">
+      <div className="bg-card p-4 md:p-6 rounded-xl border shadow-sm space-y-6">
+        <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Team Overview</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Team Overview</h1>
+            <p className="text-muted-foreground mt-1 text-sm md:text-base">
               Select a team to manage its members and view activity logs.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Select a team" />
               </SelectTrigger>
               <SelectContent>
@@ -86,7 +86,7 @@ const Team = () => {
               <Button
                 variant="outline"
                 onClick={() => setIsCreating(true)}
-                className="rounded-md"
+                className="rounded-md w-full sm:w-auto"
               >
                 Create Team
               </Button>
@@ -95,14 +95,14 @@ const Team = () => {
         </div>
       </div>
 
-      <div className="flex justify-between items-center bg-background rounded-xl p-6 border shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center bg-background rounded-xl p-4 md:p-6 border shadow-sm gap-4">
         <h2 className="text-xl font-semibold flex items-center gap-2">
           Members
         </h2>
         {(user?.role === "ADMIN" || user?.role === "MANAGER") && (
           <Button
             onClick={() => setIsAdding(true)}
-            className="rounded-full px-6"
+            className="rounded-full px-6 w-full sm:w-auto"
           >
             + Add Member to this Team
           </Button>

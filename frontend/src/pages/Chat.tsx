@@ -26,13 +26,13 @@ const Chat = () => {
   const isAdmin = user.role === "ADMIN";
 
   return (
-    <div className="p-6 space-y-4 flex flex-col h-full">
-      <div className="flex justify-between items-center bg-card p-4 rounded-lg border shadow-sm">
-        <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold">Team Chat</h1>
+    <div className="p-4 md:p-6 space-y-4 flex flex-col h-full">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center bg-card p-4 rounded-lg border shadow-sm gap-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full">
+          <h1 className="text-2xl font-bold whitespace-nowrap">Team Chat</h1>
           {isAdmin && teams.length > 0 && (
             <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
-              <SelectTrigger className="w-[250px]">
+              <SelectTrigger className="w-full sm:w-[250px]">
                 <SelectValue placeholder="Select team chat" />
               </SelectTrigger>
               <SelectContent>

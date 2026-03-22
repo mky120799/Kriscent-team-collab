@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/navigation/Sidebar";
 import Navbar from "../components/navigation/Navbar";
+import MobileNav from "../components/navigation/MobileNav";
 import { connectSocket } from "@/socket";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { rehydrateUser, clearUser } from "@/store/slices/auth.slice";
@@ -11,6 +12,7 @@ import { onAuthStateChanged } from "firebase/auth";
 const AppLayout = () => {
   const dispatch = useAppDispatch();
   const { isInitialized } = useAppSelector((state) => state.auth);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     let isRehydrating = false;
@@ -39,6 +41,17 @@ const AppLayout = () => {
     return () => unsubscribe();
   }, [dispatch]);
 
+  // Close mobile menu on larger screens or route changes (handled by components but good to have)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   if (!isInitialized) {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-background">
@@ -53,14 +66,23 @@ const AppLayout = () => {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
+      {/* Desktop Sidebar */}
       <Sidebar />
 
-      <div className="flex flex-1 flex-col">
-        <Navbar />
+      {/* Mobile Sidebar/Drawer Overlay */}
+      <MobileNav 
+        isOpen={isMobileMenuOpen} 
+        onClose={() => setIsMobileMenuOpen(false)} 
+      />
 
-        <main className="flex-1 bg-gray-100 dark:bg-gray-800/50 p-6 overflow-y-auto">
-          <Outlet />
+      <div className="flex flex-1 flex-col transition-all duration-300 min-w-0">
+        <Navbar onOpenMobileMenu={() => setIsMobileMenuOpen(true)} />
+
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
+          <div className="max-w-7xl mx-auto h-full">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
