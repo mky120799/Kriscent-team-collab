@@ -185,5 +185,5 @@ cd frontend && npm run dev
 4.  **Responsive Sidebar**: Custom-built mobile drawer system in `AppLayout` for optimal mobile navigation.
 
 ---
-contact me at [mky120799@gmail.com]
+
 Built with ❤️ by **Mithilesh Yadav**
