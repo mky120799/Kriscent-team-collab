@@ -9,6 +9,7 @@ A high-performance, real-time team collaboration platform designed for modern pr
 ---
 
 ## 📖 Table of Contents
+- [🎓 Python Backend Mastery](#-python-backend-mastery)
 - [✨ Key Features](#✨-key-features)
 - [🛠️ Tech Stack](#🛠️-tech-stack)
 - [🏗️ Project Architecture](#🏗️-project-architecture)
@@ -18,6 +19,10 @@ A high-performance, real-time team collaboration platform designed for modern pr
 - [⚙️ Configuration](#⚙️-configuration)
 
 ---
+
+## 🎓 Python Backend Mastery
+
+The repository includes a FastAPI/MongoDB implementation in [`backend-python/`](backend-python/). Follow the complete chapter-based course in [Python Backend Mastery](docs/python-backend-course/README.md), covering Python foundations, FastAPI, async persistence, auth/RBAC, Socket.IO, external integrations, testing, deployment, and a repeatable feature implementation workflow.
 
 ## ✨ Key Features
 
